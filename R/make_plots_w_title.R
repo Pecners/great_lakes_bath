@@ -1,12 +1,12 @@
 library(parallel)
 library(doParallel)
 
-e <- readRDS("plot.rda")
+#e <- readRDS("plot.rda")
 
 do_it <- function(angle) {
   cat(glue::glue("Starting angle {angle}"), "\n")
-  rayshader::plot_gg(e, multicore = TRUE, width = 5, height = 5, sunangle = angle, raytrace = TRUE, 
-          windowsize = c(1400, 866), solidcolor = bg, solidlinecolor = bg) 
+  rayshader::plot_gg(ee_notext, multicore = TRUE, width = 5, height = 5, sunangle = angle, raytrace = TRUE, 
+                     windowsize = c(1400, 866), solidcolor = bg, solidlinecolor = bg) 
   
   rayshader::save_obj(glue::glue("lakes_{angle}.obj"))
   rgl::rgl.close()
@@ -18,11 +18,8 @@ do_it <- function(angle) {
 cl <- makeCluster(10)
 registerDoParallel(cl)
 
+foreach(i = c(1:50)) %dopar% do_it(i)
 
-for (x in 1:36) {
-  cat(glue("Working on angles {x}:{x*10}"), "\n")
-  foreach(i = c(1:360)) %dopar% do_it(i)
-}
 
 do_it2 <- function(s) {
   cat(glue::glue("Starting angle {s}"), "\n")
