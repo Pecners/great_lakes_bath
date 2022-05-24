@@ -48,10 +48,10 @@ h <- 2187
 ww <- w/2 - 150
 hh <- h/2 - 250
 
-cleg <- image_crop(leg, glue("300x500+{ww}+{hh}")) %>%
+cleg <- image_crop(leg, glue("400x500+{ww}+{hh}")) %>%
   image_scale("x300")
 
-#print(cleg)
+print(cleg)
 
 # As opposed to the rotating light video, this video can use a single rgl object
 # so we just need to call this once.
@@ -59,12 +59,14 @@ cleg <- image_crop(leg, glue("300x500+{ww}+{hh}")) %>%
 rayshader::plot_gg(e_noleg, multicore = TRUE, width = 5, height = 5, sunangle = 1, 
                    raytrace = TRUE, scale = 50,
                    windowsize = c(1400, 866), solidcolor = bg, solidlinecolor = bg) 
-#render_camera(zoom = .1)
+#render_camera(zoom = .4)
 
-# Set the number of frames -- since we iterated our plots by 1 angle degree, 
-# 360 frames makes a single rotation. 720 makes 2 rotations
+# Set the number of frames -- I want 2 rotations, which is 720 degrees,
+# but I also want to be able to slow down the video, which requires more
+# frames to keep it from being chopy. Therefore, I'll iterate by .5 degrees
+# and calculate vectors of 1440 length.
 
-frames <- 720
+frames <- 720 * 2
 
 # Set up temp dir for png files, or set up your own dir if you want to keep
 # the frame png files.
@@ -85,33 +87,34 @@ on.exit(unlink(png_files))
 # Set vector of phi values for the camera -- phi is the angle at which
 # the camera is looking at the ground, e.g. 0 would be parallel to the ground.
 
-phivechalf = 15 + 15 * 1/(1 + exp(seq(-20, 20, length.out = 90)/2))
-phivecfull = c(phivechalf, rep(phivechalf[length(phivechalf)], 180), rev(phivechalf))
+phivechalf = 15 + 15 * 1/(1 + exp(seq(-15, 15, length.out = 120)/2))
+phivecfull = c(phivechalf, rep(phivechalf[length(phivechalf)], 520), rev(phivechalf))
 phi <- c(
-  rep(30, 360),
+  rep(30, 680),
   phivecfull
 )
-
+plot(phi)
 # Set vector of theta, which is the angle around the plot. Theta of 0
 # would be the orientation of how ggplot creates the plot.
 
-theta <- rep(c(0:359), 2)
+theta <- rep(seq(from = 0, to = 359.5, by = .5), 2)
+
 
 # Set a vector of zoom
-zoomvec = 0.2 + 0.2 * 1/(1 + exp(seq(-20, 20, length.out = 90)/2))
-zoom_vec_full <- c(zoomvec, rep(zoomvec[length(zoomvec)], 180),
+zoomvec = 0.2 + 0.2 * 1/(1 + exp(seq(-15, 15, length.out = 120)/2))
+zoom_vec_full <- c(zoomvec, rep(zoomvec[length(zoomvec)], 520),
                    rev(zoomvec))
 zoom <- c(
-  rep(.4, 360),
+  rep(.4, 680),
   zoom_vec_full
 )
 
 
-# This loops for the number of frames we want (720, or 2 rotations),
+# This loops for the number of frames we want,
 # changing the camera view of our rgl object to the respective values
 # for phi, theta, and zoom
 
-for (i in 1:720) {
+for (i in 1:frames) {
     
   
   render_camera(phi = phi[i], zoom = zoom[i], theta = theta[i])
@@ -158,4 +161,4 @@ for (i in 1:720) {
 
 # Now, with our frames complete, we create the video!
 
-av::av_encode_video(png_files, output = "full_size.mp4", framerate = 30)
+av::av_encode_video(png_files, output = "full_size_slow.mp4", framerate = 25)

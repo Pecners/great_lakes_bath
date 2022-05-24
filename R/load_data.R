@@ -12,6 +12,7 @@ library(scico)
 library(raster)
 library(rayimage)
 library(rayrender)
+library(showtext)
 
 # Data source: https://www.ngdc.noaa.gov/mgg/greatlakes/
 # Download the GeoTiff files
@@ -48,6 +49,9 @@ bg <- "white"
 davos_c <- scico(n = 10, palette = "davos")
 text_color <- davos_c[2]
 
+font_add_google("Cinzel Decorative", "cd")
+showtext_auto()
+
 # This is a plot with labels I used for the rotating light source video.
 # For the rotating video with static shadow direction, I preferred to add
 # title, subtitle, caption, and legend using {magick} (see R/make_vid_magick.R)
@@ -60,12 +64,12 @@ e <- rev %>%
   geom_tile(data = rev %>% filter(lake == "huron")) +
   geom_tile(data = rev %>% filter(lake == "erie")) +
   geom_tile(data = rev %>% filter(lake == "ontario")) +
-  coord_sf(crs = 3347, expand = 0) +
+  coord_sf(crs = 3174, expand = 0) +
   scale_fill_scico(palette = "davos", direction = -1) +
   theme(legend.position = c(.5, .5),
         legend.background = element_rect(fill = NA),
-        legend.title = element_text(family = "serif", color = text_color, size = 12),
-        legend.text = element_text(family = "serif", color = text_color, size = 8),
+        legend.title = element_text(family = "cd", color = text_color, size = 12),
+        legend.text = element_text(family = "cd", color = text_color, size = 8),
         #legend.key =  element_rect(fill = NA),
         #legend.key.size = unit(.02, "npc"),
         panel.background = element_rect(fill = bg),
