@@ -1,19 +1,13 @@
 library(MetBrewer)
+library(magick)
 
-lake <- "huron"
+lake <- "ontario"
 
 d_ <- raster(glue("data/{lake}_lld/{lake}_lld.tif"))
-lake <- "erie"
 
-de <- raster(glue("data/{lake}_lld/{lake}_lld.tif"))
-
-ded <- raster_to_matrix(de)
 dd <- raster_to_matrix(d_)
 
-both <- raster::merge(ded, dd)
-
-small_h <- resize_matrix(dd, 0.25)
-small_e <- resize_matrix(ded, .25)
+small <- resize_matrix(dd, 0.25)
 
 
 fix <- function(x) {
@@ -32,13 +26,13 @@ fix <- function(x) {
   return(x)
 }
 
-full_fixed <- fix(both)
-small_fixed_h <- fix(small_h)
+full_fixed <- fix(dd)
+small_fixed <- fix(small)
 
 colors <- met.brewer("Tam")
 
 
-hm <- small_fixed_h
+hm <- full_fixed
 
 hm %>%
   height_shade(texture = (grDevices::colorRampPalette(rev(colors)))(256)) %>%
@@ -46,42 +40,38 @@ hm %>%
   #add_shadow(ambient_shade(full_fixed, multicore = TRUE)) %>%
   add_shadow(ray_shade(hm, multicore = TRUE, sunaltitude = 80)) %>%
   plot_3d(heightmap = hm, solid = FALSE,
-          #windowsize = c(800, 400), 
+          windowsize = c(800, 400), 
           #shadow_darkness = .25, shadowcolor = "#F1C659",
-          phi = 90, zoom = .75, theta = 0, background = "white")
+          phi = 80, zoom = .5, theta = 0, background = "white")
 
-render_camera(phi = 80, theta = 0, zoom = .75)
+render_camera(phi = 80, theta = 0, zoom = .5)
 
 
-render_highquality("huron_hq1.png", parallel = TRUE, lightaltitude = 80)
+render_highquality("ontario_hq.png", parallel = TRUE, lightaltitude = 90, 
+                   width = 6000, height = 3000)
 
 
 
 
 rgl::rgl.close()
 
+text_color <- colors[8]
 
-library(magick)
-
-scico(n = 10, palette = "lajolla")
-
-text_color <- "#462919"
-
-img <- image_read("test_hq2.png")
+img <- image_read("ontario_hq.png")
 
 # Title
 img_ <- image_annotate(img, "Great Lake Depths", font = "Cinzel Decorative",
                        weight = 700, decoration = "underline",
-                       color = text_color, size = 200, gravity = "East",
-                       location = "+350-500")
+                       color = text_color, size = 200, gravity = "northwest",
+                       location = "+100+100")
 # Subtitle
-img_ <- image_annotate(img_, "Lake Michigan", 
-                       font = "Cinzel Decorative", location = "+700-200",
-                       color = text_color, size = 175, gravity = "east")
+img_ <- image_annotate(img_, "Lake Ontario", 
+                       font = "Cinzel Decorative", location = "+450+400",
+                       color = text_color, size = 175, gravity = "northwest")
 
 # Caption
 img_ <- image_annotate(img_, "Graphic by Spencer Schien (@MrPecners) | Data from NOAA", 
                        font = "Cinzel Decorative", location = "+0+20",
-                       color = alpha(text_color, .5), size = 100, gravity = "south")
+                       color = alpha(text_color, .5), size = 75, gravity = "south")
 
-magick::image_write(img_, "test_hq_titled.png")
+magick::image_write(img_, "ontario_hq_titled.png")

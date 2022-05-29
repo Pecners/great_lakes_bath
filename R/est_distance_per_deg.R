@@ -1,14 +1,15 @@
 meas <- rev %>%
-  st_as_sf(coords = c("long", "lat"), crs = 4326) 
+  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  st_transform(crs=  3174)
 
 bb <- st_bbox(meas)
 
-p1 <- st_sfc(st_point(c(bb["xmin"], bb["ymin"])), crs = 4326)
-p2 <- st_sfc(st_point(c(bb["xmax"], bb["ymin"])), crs = 4326)
+p1 <- st_sfc(st_point(c(bb["xmin"], bb["ymin"])), crs = 3174)
+p2 <- st_sfc(st_point(c(bb["xmax"], bb["ymin"])), crs = 3174)
 
 d1 <- st_distance(p1, p2)
 
-p3 <- st_sfc(st_point(c(bb["xmin"], bb["ymax"])), crs = 4326)
+p3 <- st_sfc(st_point(c(bb["xmin"], bb["ymax"])), crs = 3174)
 
 d2 <- st_distance(p1, p3)
 

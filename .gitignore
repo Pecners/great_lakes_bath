@@ -7,3 +7,5 @@
 data/*
 imgs/*
 imgs_rotating/*
+*.png
+env/*
